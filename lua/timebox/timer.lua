@@ -1,3 +1,6 @@
+---@class Timer
+---
+
 local M = {}
 
 local uv = vim.loop
@@ -5,6 +8,8 @@ local timer = nil
 local start_time = nil
 local elapsed_time = 0
 
+---@param duration {work: number}
+---@param timer_start_callback fun(elapsed: number, stop_time: number)
 function M.start(duration, timer_start_callback)
 	timer = uv.new_timer()
 	start_time = os.time()
@@ -14,6 +19,7 @@ function M.start(duration, timer_start_callback)
 	end)
 end
 
+---@param timer_stop_callback fun()
 function M.stop(timer_stop_callback)
 	if timer then
 		timer:stop()
@@ -23,6 +29,7 @@ function M.stop(timer_stop_callback)
 	end
 end
 
+---@param timer_pause_callback fun()
 function M.pause(timer_pause_callback)
 	if timer then
 		timer:stop()
@@ -31,6 +38,8 @@ function M.pause(timer_pause_callback)
 	end
 end
 
+---@param duration {work: number}
+---@param timer_resume_callback fun(elapsed: number)
 function M.resume(duration, timer_resume_callback)
 	if timer then
 		timer:start(duration.work, 0, function()
