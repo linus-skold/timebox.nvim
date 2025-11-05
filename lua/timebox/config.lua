@@ -1,3 +1,10 @@
+
+---@class TimeboxConfig
+---@field duration table
+---@field notifications boolean
+---@field messages table
+---@field storage table
+
 local M = {}
 
 M.defaults = {
@@ -19,6 +26,7 @@ M.defaults = {
 
 M.options = {}
 
+---@param opts? TimeboxConfig
 function M.setup(opts)
 	M.options = vim.tbl_deep_extend("force", M.defaults, opts or {})
 end
