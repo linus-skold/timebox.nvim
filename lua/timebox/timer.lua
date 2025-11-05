@@ -1,56 +1,63 @@
 ---@class Timer
----
 
 local M = {}
+M.__index = M
 
-local uv = vim.loop
-local timer = nil
-local start_time = nil
-local elapsed_time = 0
-
----@param duration {work: number}
----@param timer_start_callback fun(elapsed: number, stop_time: number)
-function M.start(duration, timer_start_callback)
-	timer = uv.new_timer()
-	start_time = os.time()
-	timer:start(duration.work, 0, function()
-		local stop_time = os.time()
-		timer_start_callback(os.time() - start_time, stop_time)
-	end)
+---@param duration number
+---@param callbacks { on_timer_end: fun(), on_stop: fun(), on_pause: fun(), on_resume: fun() }
+function M.new(duration, callbacks)
+	local self = setmetatable({}, M)
+	self.uv = vim.loop
+	self.start_time = nil
+	self.timer = nil
+	self.elapsed = 0
+	self.duration = duration
+	self.callbacks = callbacks or {}
+	return self
 end
 
----@param timer_stop_callback fun()
-function M.stop(timer_stop_callback)
-	if timer then
-		timer:stop()
-		timer:close()
-		timer = nil
-		timer_stop_callback()
+---@param duration number
+---@param end_callback fun()
+---@return number
+function M:start()
+	self.timer = self.uv.new_timer()
+	self.timer:start(self.duration, 0, self.callbacks.on_timer_end)
+	self.start_time = os.time()
+	return self.start_time
+end
+
+---@
+function M:stop()
+	if self.timer then
+		self.timer:stop()
+		self.timer:close()
+		self.timer = nil
+		self.callbacks.on_stop()
 	end
 end
 
----@param timer_pause_callback fun()
-function M.pause(timer_pause_callback)
-	if timer then
-		timer:stop()
-		elapsed_time = os.time() - start_time
-		timer_pause_callback()
+---@
+function M:pause()
+	if self.timer then
+		self.timer:stop()
+		self.elapsed = os.time() - self.start_time
+		self.callbacks.on_pause()
 	end
 end
 
----@param duration {work: number}
----@param timer_resume_callback fun(elapsed: number)
-function M.resume(duration, timer_resume_callback)
-	if timer then
-		timer:start(duration.work, 0, function()
-			timer_resume_callback(elapsed)
-		end)
+---@
+function M:resume()
+	if self.timer then
+		self.timer:start(self.duration - self.elapsed, 0, self.callbacks.on_timer_end)
+		self.start_time = os.time()
+		self.callbacks.on_resume()
 	end
 end
 
-function M.current_elapsed()
-	if start_time then
-		return os.time() - start_time
+---@return number
+function M:get_elapsed()
+	if self.start_time then
+		return os.time() - self.start_time
 	else
 		return 0
 	end
