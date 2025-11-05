@@ -2,6 +2,7 @@ local storage = require("timebox.storage")
 
 local M = {}
 
+---@param blocks Block[]
 local function summarize_blocks(blocks)
 	local summary = {}
 	for _, block in ipairs(blocks) do
@@ -10,6 +11,7 @@ local function summarize_blocks(blocks)
 	end
 	return summary
 end
+
 
 local function graph_blocks(summary)
 	local graph = {}
