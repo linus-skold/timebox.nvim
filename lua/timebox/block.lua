@@ -5,8 +5,6 @@
 ---@field elapsed number
 ---@field block_type string
 
-local timer = require("timebox.timer")
-
 local M = {}
 M.__index = M
 
@@ -26,7 +24,9 @@ end
 function M:stop()
 	self.end_time = os.time()
 	self.elapsed = self.end_time - self.start_time
-	self.timer:stop()
+	if self.timer then
+		self.timer:stop()
+	end
 end
 
 function M:pause()
