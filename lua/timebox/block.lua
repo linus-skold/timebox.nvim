@@ -24,9 +24,7 @@ end
 function M:stop()
 	self.end_time = os.time()
 	self.elapsed = self.end_time - self.start_time
-	if self.timer then
-		self.timer:stop()
-	end
+	self.timer:stop()
 end
 
 function M:pause()
