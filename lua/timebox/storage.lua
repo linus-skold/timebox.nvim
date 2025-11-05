@@ -1,9 +1,22 @@
+---@class Storage
+---@field dir string
+---@field logfile string
+
+---@class Block
+---@field name string
+---@field start_time number
+---@field end_time number
+---@field elapsed number
+---@field block_type string
+
+
 local M = {}
 
 local dir = nil
 local logfile = nil
 
-function M.load_blocks()
+---@param blocks Block[]
+function M.save_blocks(blocks)
 	local content = vim.fn.json_encode(blocks)
 	local f = io.open(logfile, "w")
 	if f then
@@ -12,7 +25,8 @@ function M.load_blocks()
 	end
 end
 
-function M.save_blocks(tasks)
+---@return Block[]
+function M.save_blocks()
 	local f = io.open(logfile, "r")
 	if not f then
 		return {}
@@ -23,18 +37,20 @@ function M.save_blocks(tasks)
 	return ok and data or {}
 end
 
-function M.log_block(task)
+---@param block Block
+function M.log_block(block)
 	local blocks = load_blocks()
 	table.insert(blocks, {
-		task = task.name,
-		start_time = task.start_time,
-		end_time = task.end_time,
-		stop_time = task.stop_time,
-		block_type = task.block_type,
+		task = block.name,
+		start_time = block.start_time,
+		end_time = block.end_time,
+		elapsed = block.elapsed,
+		block_type = block.block_type,
 	})
 	save_blocks(blocks)
 end
 
+---@param opts {dir: string}
 function M.setup(opts)
 	dir = opts.dir
 	vim.fn.mkdir(dir, "p")
