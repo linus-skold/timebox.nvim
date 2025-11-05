@@ -13,7 +13,7 @@ function M.setup(opts)
 	storage.setup(config.options.storage)
 
 	local function continue_prompt()
-		Snacks.input({ prompt = " Continue working on:" .. current_block.name .. " (y/n): " }, function(input)
+		Snacks.input({ prompt = " Continue working on: " .. current_block.name .. " (y/n): " }, function(input)
 			if input == "y" then
 				vim.notify("Resumed task: " .. current_block.name, vim.log.levels.INFO)
 				current_block:resume() -- should resume the current block and remove the coffee break from the elapsed time
@@ -23,26 +23,26 @@ function M.setup(opts)
 		end)
 	end
 
-	local function on_timer_end()
+	---@param stopEvent string
+	local function on_stop(stopEvent)
+		if stopEvent == "manual" then
+			vim.notify(" Timer stopped for task: " .. current_block.name, vim.log.levels.INFO)
+			current_block:stop()
+			storage.log_block(current_block)
+			return
+		end
+
 		vim.notify(" Timer ended for task: " .. current_block.name, vim.log.levels.INFO)
 		current_block:stop()
 		storage.log_block(current_block)
-
 		Snacks.input({ prompt = " Take a break? (y/n): " }, function(input)
 			if input == "y" then
 				vim.notify("Started coffee break.", vim.log.levels.INFO)
 				-- start coffee break logic here
-				--
 			else
 				continue_prompt()
 			end
 		end)
-	end
-
-	local function on_stop()
-		vim.notify(" Timer stopped for task: " .. current_block.name, vim.log.levels.INFO)
-		current_block:stop()
-		storage.log_block(current_block)
 	end
 
 	local function on_pause()
@@ -56,7 +56,7 @@ function M.setup(opts)
 	local function start_task()
 		Snacks.input({ prompt = "What will you work on? " }, function(input)
 			if input and input ~= "" then
-				local t = timer.new(config.duration.work, {
+				local t = timer.new(config.options.duration.work, {
 					on_timer_end = on_timer_end,
 					on_stop = on_stop,
 					on_pause = on_pause,
