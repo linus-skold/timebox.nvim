@@ -2,15 +2,8 @@
 ---@field dir string
 ---@field logfile string
 
----@class Block
----@field name string
----@field start_time number
----@field end_time number
----@field elapsed number
----@field block_type string
-
-
 local M = {}
+M.__index = M
 
 local dir = nil
 local logfile = nil
@@ -26,7 +19,7 @@ function M.save_blocks(blocks)
 end
 
 ---@return Block[]
-function M.save_blocks()
+function M.load_blocks()
 	local f = io.open(logfile, "r")
 	if not f then
 		return {}
@@ -39,7 +32,7 @@ end
 
 ---@param block Block
 function M.log_block(block)
-	local blocks = load_blocks()
+	local blocks = M.load_blocks()
 	table.insert(blocks, {
 		task = block.name,
 		start_time = block.start_time,
@@ -47,7 +40,7 @@ function M.log_block(block)
 		elapsed = block.elapsed,
 		block_type = block.block_type,
 	})
-	save_blocks(blocks)
+	M.save_blocks(blocks)
 end
 
 ---@param opts {dir: string}
