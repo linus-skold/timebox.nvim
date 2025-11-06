@@ -36,7 +36,7 @@ end
 
 function M:stop()
 	self.timer:stop()
-	storage.log_block(self:get_block_info())
+	storage.log_block(self)
 end
 
 function M:pause()
