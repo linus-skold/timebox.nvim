@@ -2,6 +2,7 @@ local config = require("timebox.config")
 local storage = require("timebox.storage")
 local timer = require("timebox.timer")
 local block = require("timebox.block")
+local breakdown = require("timebox.breakdown")
 
 local M = {}
 
@@ -21,8 +22,6 @@ function M.setup(opts)
 		Snacks.input({ prompt = " Take a break? (y/n): " }, function(input)
 			if input == "y" then
 				vim.notify("Started coffee break.", vim.log.levels.INFO)
-				-- TODO: start coffee break logic here
-
 				current_block = block.new(
 					"Coffee Break",
 					"break",
@@ -36,8 +35,7 @@ function M.setup(opts)
 				)
 				current_block:start()
 			else
-				vim.notify("No break taken. Ready for a new task!", vim.log.levels.INFO)
-				-- TODO: prompt for new task
+				vim.notify("No break taken. Ready for a new task!", vim.log.levels.INFO)`
 				start_task(prev_block.name)
 			end
 		end)
@@ -74,6 +72,8 @@ function M.setup(opts)
 		end)
 	end
 
+
+    vim.api.nvim_create_user_command("TimeboxBreakdown", breakdown.show_breakdown, {})
 	vim.api.nvim_create_user_command("TimeboxStart", start_task, {})
 	vim.api.nvim_create_user_command("TimeboxPause", handle_pause, {})
 	vim.api.nvim_create_user_command("TimeboxResume", handle_resume, {})

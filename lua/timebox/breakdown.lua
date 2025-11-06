@@ -6,8 +6,7 @@ local M = {}
 local function summarize_blocks(blocks)
 	local summary = {}
 	for _, block in ipairs(blocks) do
-		local duration = (block.stop_time - block.start_time)
-		summary[block.task] = (summary[block.task] or 0) + duration
+		summary[block.name] = (summary[block.name] or 0) + block.elapsed 
 	end
 	return summary
 end
@@ -44,10 +43,10 @@ function M.show_breakdown()
 	vim.cmd("tabnew")
 	local buf = vim.api.nvim_get_current_buf()
 	vim.api.nvim_buf_set_lines(buf, 0, -1, false, graph)
-	vim.api.nvim_buf_set_option(buf, "buftype", "nofile")
-	vim.api.nvim_buf_set_option(buf, "bufhidden", "wipe")
-	vim.api.nvim_buf_set_option(buf, "modifiable", false)
-	vim.api.nvim_buf_set_option(buf, "filetype", "nagare_breakdown")
+	vim.bo[buf].buftype = "nofile"
+	vim.bo[buf].bufhidden = "wipe"
+	vim.bo[buf].modifiable = false
+	vim.bo[buf].filetype = "nagare_breakdown"
 end
 
 return M
