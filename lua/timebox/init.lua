@@ -18,7 +18,8 @@ function M.setup(opts)
 		vim.notify(" Timer ended for task: " .. current_block.name, vim.log.levels.INFO)
 		current_block:stop()
 		prev_block = current_block
-
+    
+        -- TODO: investigate why this input did not prompt after task timer finished
 		Snacks.input({ prompt = " Take a break? (y/n): " }, function(input)
 			if input == "y" then
 				vim.notify("Started coffee break.", vim.log.levels.INFO)

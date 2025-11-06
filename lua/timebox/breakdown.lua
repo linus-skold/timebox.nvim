@@ -24,7 +24,7 @@ local function graph_blocks(summary)
 	for task, dur in pairs(summary) do
 		local bar_length = math.floor((dur / max_duration) * max_length)
 		local bar = string.rep("█", bar_length)
-		local time_display = dur < 60 and "< 1 minute" or string.format("%.1f minutes", dur / 60)
+		local time_display = dur < 60 and "< 1 minute" or string.format("%d minutes", math.floor(dur / 60 + 0.5))
 		table.insert(graph, string.format("%-20s | %s (%s)", task, bar, time_display))
 	end
 	return graph
