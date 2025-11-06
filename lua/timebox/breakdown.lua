@@ -40,14 +40,39 @@ function M.show_breakdown()
 	local summary = summarize_blocks(blocks)
 	local graph = graph_blocks(summary)
 
-	-- open a scratch buffer
-	vim.cmd("tabnew")
-	local buf = vim.api.nvim_get_current_buf()
+	-- create a scratch buffer
+	local buf = vim.api.nvim_create_buf(false, true)
 	vim.api.nvim_buf_set_lines(buf, 0, -1, false, graph)
 	vim.bo[buf].buftype = "nofile"
 	vim.bo[buf].bufhidden = "wipe"
 	vim.bo[buf].modifiable = false
-	vim.bo[buf].filetype = "nagare_breakdown"
+	vim.bo[buf].filetype = "breakdown"
+
+	-- calculate window size
+    -- TODO: Dynamically size based on content? Alternatively user configurable and scrollable
+	local width = 70
+	local height = #graph
+	local ui = vim.api.nvim_list_uis()[1]
+	local win_width = ui.width
+	local win_height = ui.height
+
+	-- create floating window
+	-- TODO: Add config options for window
+    local win = vim.api.nvim_open_win(buf, true, {
+		relative = "editor",
+		width = width,
+		height = height,
+		col = math.floor((win_width - width) / 2),
+		row = math.floor((win_height - height) / 2),
+		style = "minimal",
+		border = "rounded",
+		title = " Task Breakdown ",
+		title_pos = "center",
+	})
+
+	-- close on q or Esc
+	vim.keymap.set("n", "q", "<cmd>close<cr>", { buffer = buf, nowait = true })
+	vim.keymap.set("n", "<Esc>", "<cmd>close<cr>", { buffer = buf, nowait = true })
 end
 
 return M
