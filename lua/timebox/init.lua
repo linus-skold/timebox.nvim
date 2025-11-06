@@ -14,6 +14,8 @@ function M.setup(opts)
 	config.setup(opts)
 	storage.setup(config.options.storage)
 
+    local start_task
+
 	local function handle_block_completion()
 		vim.notify(" Timer ended for task: " .. current_block.name, vim.log.levels.INFO)
 		current_block:stop()
@@ -30,14 +32,14 @@ function M.setup(opts)
 						on_timer_end = function()
 							vim.notify(" Coffee break ended. Ready for a new task!", vim.log.levels.INFO)
 							current_block:stop()
-							start_task(prev_block.name)
+							start_task(prev_block and prev_block.name or "")
 						end,
 					})
 				)
 				current_block:start()
 			else
 				vim.notify("No break taken. Ready for a new task!", vim.log.levels.INFO)
-				start_task(prev_block.name)
+				start_task(prev_block and prev_block.name or "")
 			end
 		end)
 	end
