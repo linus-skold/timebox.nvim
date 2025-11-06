@@ -25,7 +25,8 @@ local function graph_blocks(summary)
 		local bar_length = math.floor((dur / max_duration) * max_length)
 		local bar = string.rep("█", bar_length)
 		local time_display
-		if dur < 60 then
+        -- ISSUE: Number presented as 3.@@@ when duration is above a minute
+        if dur < 60 then
 			time_display = string.format("%d seconds", math.floor(dur + 0.5))
 		else
 			time_display = string.format("%d minutes", math.floor(dur / 60 + 0.5))
