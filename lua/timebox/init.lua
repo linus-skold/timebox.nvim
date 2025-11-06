@@ -81,7 +81,7 @@ function M.setup(opts)
 	vim.api.nvim_create_user_command("TimeboxStatus", function()
 		if current_block then
 			local status = current_block:is_paused() and "Paused" or "Running"
-			local elapsed = current_block.timer:get_elapsed()
+			local elapsed = current_block.timer:get_elapsed() / 1000 .. "s"
 			vim.notify(
 				"Current task: " .. current_block.name .. " | Status: " .. status .. " with " .. elapsed,
 				vim.log.levels.INFO
