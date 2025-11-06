@@ -14,9 +14,10 @@ function M.setup(opts)
 	config.setup(opts)
 	storage.setup(config.options.storage)
 
-    local start_task
+	local start_task
+	local handle_block_completion
 
-	local function handle_block_completion()
+	handle_block_completion = function()
 		vim.notify(" Timer ended for task: " .. current_block.name, vim.log.levels.INFO)
 		current_block:stop()
 		prev_block = current_block
@@ -59,7 +60,7 @@ function M.setup(opts)
 		current_block:resume()
 	end
 
-	local function start_task(task_name)
+	start_task = function(task_name)
 		Snacks.input({ prompt = "What will you work on? ", value = task_name }, function(input)
 			if input and input ~= "" then
 				local t = timer.new(config.options.duration.work, {
