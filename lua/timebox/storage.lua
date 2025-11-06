@@ -33,13 +33,7 @@ end
 ---@param block Block
 function M.log_block(block)
 	local blocks = M.load_blocks()
-	table.insert(blocks, {
-		task = block.name,
-		start_time = block.start_time,
-		end_time = block.end_time,
-		elapsed = block.elapsed,
-		block_type = block.block_type,
-	})
+	table.insert(blocks, block:get_block_info())
 	M.save_blocks(blocks)
 end
 

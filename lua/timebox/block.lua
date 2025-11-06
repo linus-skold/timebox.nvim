@@ -5,6 +5,8 @@
 ---@field elapsed number
 ---@field block_type string
 
+local storage = require("timebox.storage")
+
 local M = {}
 M.__index = M
 
@@ -16,15 +18,25 @@ function M.new(name, block_type, timer)
 	return self
 end
 
+function M:get_elapsed()
+    return self.timer:get_elapsed()
+end
+
+function M:get_block_info()
+    return {
+        name = self.name,
+        block_type = self.block_type,
+        elapsed = self.timer:get_elapsed(),
+    }
+end
+
 function M:start()
-	self.start_time = os.time()
 	self.timer:start()
 end
 
 function M:stop()
-	self.end_time = os.time()
-	self.elapsed = self.end_time - self.start_time
 	self.timer:stop()
+	storage.log_block(self:get_block_info())
 end
 
 function M:pause()
@@ -33,6 +45,10 @@ end
 
 function M:resume()
 	self.timer:resume()
+end
+
+function M:is_paused()
+	return self.timer:is_paused()
 end
 
 return M

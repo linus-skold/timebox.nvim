@@ -6,36 +6,46 @@ local block = require("timebox.block")
 local M = {}
 
 local current_block = nil
+local prev_block = nil
 
 ---@param opts? timebox.Config
 function M.setup(opts)
 	config.setup(opts)
 	storage.setup(config.options.storage)
 
-	local function stop_and_log(block)
-		if block then
-			block:stop()
-			storage.log_block(block)
-		end
-	end
-
 	local function handle_block_completion()
 		vim.notify(" Timer ended for task: " .. current_block.name, vim.log.levels.INFO)
-		stop_and_log(current_block)
+		current_block:stop()
+		prev_block = current_block
 
 		Snacks.input({ prompt = " Take a break? (y/n): " }, function(input)
 			if input == "y" then
 				vim.notify("Started coffee break.", vim.log.levels.INFO)
 				-- TODO: start coffee break logic here
+
+				current_block = block.new(
+					"Coffee Break",
+					"break",
+					timer.new(config.options.duration.coffee, {
+						on_timer_end = function()
+							vim.notify(" Coffee break ended. Ready for a new task!", vim.log.levels.INFO)
+							current_block:stop()
+							start_task(prev_block.name)
+						end,
+					})
+				)
+				current_block:start()
 			else
 				vim.notify("No break taken. Ready for a new task!", vim.log.levels.INFO)
+				-- TODO: prompt for new task
+				start_task(prev_block.name)
 			end
 		end)
 	end
 
 	local function handle_manual_stop()
 		vim.notify(" Timer stopped manually for task: " .. current_block.name, vim.log.levels.INFO)
-		stop_and_log(current_block)
+		current_block:stop()
 	end
 
 	local function handle_pause()
@@ -48,8 +58,8 @@ function M.setup(opts)
 		current_block:resume()
 	end
 
-	local function start_task()
-		Snacks.input({ prompt = "What will you work on? " }, function(input)
+	local function start_task(task_name)
+		Snacks.input({ prompt = "What will you work on? ", value = task_name }, function(input)
 			if input and input ~= "" then
 				local t = timer.new(config.options.duration.work, {
 					on_timer_end = handle_block_completion,
@@ -68,6 +78,18 @@ function M.setup(opts)
 	vim.api.nvim_create_user_command("TimeboxPause", handle_pause, {})
 	vim.api.nvim_create_user_command("TimeboxResume", handle_resume, {})
 	vim.api.nvim_create_user_command("TimeboxStop", handle_manual_stop, {})
+	vim.api.nvim_create_user_command("TimeboxStatus", function()
+		if current_block then
+			local status = current_block:is_paused() and "Paused" or "Running"
+			local elapsed = current_block.timer:get_elapsed()
+			vim.notify(
+				"Current task: " .. current_block.name .. " | Status: " .. status .. " with " .. elapsed,
+				vim.log.levels.INFO
+			)
+		else
+			vim.notify("No active task.", vim.log.levels.INFO)
+		end
+	end, {})
 end
 
 return M
