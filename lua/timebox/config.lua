@@ -9,8 +9,8 @@ local M = {}
 
 M.defaults = {
 	duration = {
-		work = 25 * 60 * 1000,
-		coffee = 5 * 60 * 1000,
+		work = 25 * 60,
+		coffee = 5 * 60,
 	},
 	notifications = true, -- enable/disable notificatios
 	messages = {
