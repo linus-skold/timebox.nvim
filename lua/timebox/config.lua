@@ -1,18 +1,22 @@
 
 ---@class TimeboxConfig
----@field duration table
+---@field enable boolean
+---@field debug boolean
+---@field duration {work: number, coffee: number}
 ---@field notifications boolean
----@field messages table
----@field storage table
+---@field messages {start_work: string, end_work: string, start_coffee: string, end_coffee: string}
+---@field storage {dir: string}
 
 local M = {}
 
 M.defaults = {
-	duration = {
+    enable = true,
+    debug = false,
+	notifications = true, 
+    duration = {
 		work = 25 * 60,
 		coffee = 5 * 60,
 	},
-	notifications = true, -- enable/disable notificatios
 	messages = {
 		start_work = "Time to focus! Work session started.",
 		end_work = "Great job! Work session ended.",
