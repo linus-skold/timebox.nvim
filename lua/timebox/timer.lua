@@ -19,7 +19,9 @@ end
 ---@return number
 function M:start()
 	self.timer = self.uv.new_timer()
-	self.timer:start(self.duration * 1000, 0, self.callbacks.on_timer_end)
+	self.timer:start(self.duration * 1000, 0, function()
+		vim.schedule(self.callbacks.on_timer_end)
+	end)
 	self.start_time = os.time()
 	return self.start_time
 end
@@ -44,7 +46,9 @@ end
 
 function M:resume()
 	if self.timer then
-		self.timer:start((self.duration - self.elapsed) * 1000, 0, self.callbacks.on_timer_end)
+		self.timer:start((self.duration - self.elapsed) * 1000, 0, function()
+			vim.schedule(self.callbacks.on_timer_end)
+		end)
 		self.start_time = os.time()
 	end
 end
