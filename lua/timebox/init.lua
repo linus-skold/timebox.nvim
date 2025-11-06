@@ -35,7 +35,7 @@ function M.setup(opts)
 				)
 				current_block:start()
 			else
-				vim.notify("No break taken. Ready for a new task!", vim.log.levels.INFO)`
+				vim.notify("No break taken. Ready for a new task!", vim.log.levels.INFO)
 				start_task(prev_block.name)
 			end
 		end)
