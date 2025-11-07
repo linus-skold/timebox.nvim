@@ -12,25 +12,11 @@ local function summarize_blocks(blocks)
 	return summary
 end
 
--- this should probably be a key value set of colors
-local colors = {
-	"#FF6B6B", -- red
-	"#4ECDC4", -- teal
-	"#45B7D1", -- blue
-	"#96CEB4", -- green
-	"#FFEAA7", -- yellow
-	"#DDA15E", -- light brown (coffee)
-	"#BC6C25", -- brown
-	"#A8DADC", -- light blue
-	"#F1FAEE", -- cream
-	"#E76F51", -- orange
-}
-
 local function get_color_for_task(task, index)
 	if task:lower():find("coffee") or task:lower():find("break") then
 		return "#C9A272" -- light brownish for coffee
 	end
-	return colors[((index - 1) % #colors) + 1]
+	return "#E8C547" -- comfy yellow
 end
 
 local function graph_blocks(summary)
@@ -53,13 +39,13 @@ local function graph_blocks(summary)
 		else
 			time_display = string.format("%d minutes", math.floor(dur / 60 + 0.5))
 		end
-		local line = string.format("%-20s | %s (%s)", task, bar, time_display)
+		local line = string.format("%-20s  %s (%s)", task, bar, time_display)
 		table.insert(graph, line)
 		table.insert(highlights, {
 			line_index = #graph - 1,
 			color = get_color_for_task(task, index),
-			bar_start = 23,
-			bar_end = 23 + bar_length
+			bar_start = 22,
+			bar_end = 22 + bar_length
 		})
 		index = index + 1
 	end
@@ -96,7 +82,6 @@ function M.show_breakdown()
         height = 20 -- default fallback
     end
 
-    --local height = math.min(#graph + 2, vim.api.nvim_get_option("lines") - 4)
 	local ui = vim.api.nvim_list_uis()[1]
 	local win_width = ui.width
 	local win_height = ui.height
