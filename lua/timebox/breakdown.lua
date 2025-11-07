@@ -12,9 +12,30 @@ local function summarize_blocks(blocks)
 	return summary
 end
 
+-- this should probably be a key value set of colors
+local colors = {
+	"#FF6B6B", -- red
+	"#4ECDC4", -- teal
+	"#45B7D1", -- blue
+	"#96CEB4", -- green
+	"#FFEAA7", -- yellow
+	"#DDA15E", -- light brown (coffee)
+	"#BC6C25", -- brown
+	"#A8DADC", -- light blue
+	"#F1FAEE", -- cream
+	"#E76F51", -- orange
+}
+
+local function get_color_for_task(task, index)
+	if task:lower():find("coffee") or task:lower():find("break") then
+		return "#C9A272" -- light brownish for coffee
+	end
+	return colors[((index - 1) % #colors) + 1]
+end
 
 local function graph_blocks(summary)
 	local graph = {}
+	local highlights = {}
 	local max_length = 40
 	local max_duration = 0
 	for _, dur in pairs(summary) do
@@ -22,6 +43,7 @@ local function graph_blocks(summary)
 			max_duration = dur
 		end
 	end
+	local index = 1
 	for task, dur in pairs(summary) do
 		local bar_length = math.floor((dur / max_duration) * max_length)
 		local bar = string.rep("█", bar_length)
@@ -31,9 +53,17 @@ local function graph_blocks(summary)
 		else
 			time_display = string.format("%d minutes", math.floor(dur / 60 + 0.5))
 		end
-		table.insert(graph, string.format("%-20s | %s (%s)", task, bar, time_display))
+		local line = string.format("%-20s | %s (%s)", task, bar, time_display)
+		table.insert(graph, line)
+		table.insert(highlights, {
+			line_index = #graph - 1,
+			color = get_color_for_task(task, index),
+			bar_start = 23,
+			bar_end = 23 + bar_length
+		})
+		index = index + 1
 	end
-	return graph
+	return graph, highlights
 end
 
 function M.show_breakdown()
@@ -44,7 +74,7 @@ function M.show_breakdown()
 	end
 
 	local summary = summarize_blocks(blocks)
-	local graph = graph_blocks(summary)
+	local graph, highlights = graph_blocks(summary)
 
 	-- create a scratch buffer
 	local buf = vim.api.nvim_create_buf(false, true)
@@ -83,6 +113,14 @@ function M.show_breakdown()
 		title = config.options.win.title,
 		title_pos = config.options.win.title_pos,
 	})
+
+	-- apply highlights
+	local ns_id = vim.api.nvim_create_namespace("timebox_breakdown")
+	for _, hl in ipairs(highlights) do
+		local hl_group = "TimeboxBreakdown" .. hl.line_index
+		vim.api.nvim_set_hl(0, hl_group, { fg = hl.color })
+		vim.api.nvim_buf_add_highlight(buf, ns_id, hl_group, hl.line_index, hl.bar_start, hl.bar_end)
+	end
 
 	-- close on q or Esc
 	vim.keymap.set("n", "q", "<cmd>close<cr>", { buffer = buf, nowait = true })
