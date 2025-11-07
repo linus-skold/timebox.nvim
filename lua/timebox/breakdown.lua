@@ -39,13 +39,13 @@ local function graph_blocks(summary)
 		else
 			time_display = string.format("%d minutes", math.floor(dur / 60 + 0.5))
 		end
-		local line = string.format("%-20s  %s (%s)", task, bar, time_display)
+		local line = string.format("%-20s  (%s)", task, time_display)
 		table.insert(graph, line)
 		table.insert(highlights, {
 			line_index = #graph - 1,
 			color = get_color_for_task(task, index),
-			bar_start = 22,
-			bar_end = 22 + bar_length
+			bar = bar,
+			bar_start = 22
 		})
 		index = index + 1
 	end
@@ -99,12 +99,15 @@ function M.show_breakdown()
 		title_pos = config.options.win.title_pos,
 	})
 
-	-- apply highlights
+	-- apply highlights with virtual text
 	local ns_id = vim.api.nvim_create_namespace("timebox_breakdown")
 	for _, hl in ipairs(highlights) do
 		local hl_group = "TimeboxBreakdown" .. hl.line_index
 		vim.api.nvim_set_hl(0, hl_group, { fg = hl.color })
-		vim.api.nvim_buf_add_highlight(buf, ns_id, hl_group, hl.line_index, hl.bar_start, hl.bar_end)
+		vim.api.nvim_buf_set_extmark(buf, ns_id, hl.line_index, hl.bar_start, {
+			virt_text = {{hl.bar, hl_group}},
+			virt_text_pos = "inline"
+		})
 	end
 
 	-- close on q or Esc
