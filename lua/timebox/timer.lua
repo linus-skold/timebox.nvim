@@ -28,17 +28,20 @@ end
 
 ---@return number
 function M:stop()
-	self.end_time = os.time()
+	local elapsed_time = self:get_elapsed() 
 	if self.timer then
 		self.timer:stop()
 		self.timer:close()
 		self.timer = nil
+		self.start_time = nil
 	end
-	return self:get_elapsed()
+
+	return elapsed_time
 end
 
 function M:pause()
 	if self.timer then
+		self.start_time = nil
 		self.timer:stop()
 		self.elapsed = self.elapsed + (os.time() - self.start_time)
 	end
