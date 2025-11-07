@@ -60,7 +60,7 @@ function M.show_breakdown()
     local height
     if type(config.options.win.height) == "number" then
         height = config.options.win.height
-    else if config.options.win.height == "auto" then
+    elseif config.options.win.height == "auto" then
         height = math.min(#graph + 2, vim.api.nvim_get_option("lines") - 4)
     else
         height = 20 -- default fallback
