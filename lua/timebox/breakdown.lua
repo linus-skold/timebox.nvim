@@ -66,7 +66,7 @@ function M.show_breakdown()
         height = 20 -- default fallback
     end
 
-    local height = math.min(#graph + 2, vim.api.nvim_get_option("lines") - 4)
+    --local height = math.min(#graph + 2, vim.api.nvim_get_option("lines") - 4)
 	local ui = vim.api.nvim_list_uis()[1]
 	local win_width = ui.width
 	local win_height = ui.height
