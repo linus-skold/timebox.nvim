@@ -26,6 +26,14 @@ M.defaults = {
 	storage = {
 		dir = vim.fn.stdpath("data") .. "/timebox",
 	},
+    win = {
+        width = 70,
+        height = "auto",  -- "auto" or number
+        title = " Timebox Breakdown ",
+        border = "rounded",
+        style = "minimal",
+        title_pos = "center",
+    },
 }
 
 M.options = {}

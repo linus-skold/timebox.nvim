@@ -1,4 +1,5 @@
 local storage = require("timebox.storage")
+local config = require("timebox.config")
 
 local M = {}
 
@@ -54,25 +55,33 @@ function M.show_breakdown()
 	vim.bo[buf].filetype = "breakdown"
 
 	-- calculate window size
-    -- TODO: Dynamically size based on content? Alternatively user configurable and scrollable
-	local width = 70
-	local height = #graph
+	local width = config.options.win.width
+
+    local height
+    if type(config.options.win.height) == "number" then
+        height = config.options.win.height
+    else if config.options.win.height == "auto" then
+        height = math.min(#graph + 2, vim.api.nvim_get_option("lines") - 4)
+    else
+        height = 20 -- default fallback
+    end
+
+    local height = math.min(#graph + 2, vim.api.nvim_get_option("lines") - 4)
 	local ui = vim.api.nvim_list_uis()[1]
 	local win_width = ui.width
 	local win_height = ui.height
 
 	-- create floating window
-	-- TODO: Add config options for window
     local win = vim.api.nvim_open_win(buf, true, {
 		relative = "editor",
 		width = width,
 		height = height,
 		col = math.floor((win_width - width) / 2),
 		row = math.floor((win_height - height) / 2),
-		style = "minimal",
-		border = "rounded",
-		title = " Task Breakdown ",
-		title_pos = "center",
+		style = config.options.win.style,
+		border = config.options.win.border,
+		title = config.options.win.title,
+		title_pos = config.options.win.title_pos,
 	})
 
 	-- close on q or Esc
