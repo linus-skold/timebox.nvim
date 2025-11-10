@@ -13,7 +13,8 @@ local prev_block = nil
 function M.setup(opts)
 	config.setup(opts)
 	storage.setup(config.options.storage)
-
+	local has_dooing = pcall(require, "dooing")
+	local block_list = {} -- session block list
 	local start_task
 	local handle_block_completion
 
@@ -59,22 +60,65 @@ function M.setup(opts)
 		current_block:resume()
 	end
 
-	start_task = function(task_name)
+	create_task = function(task_name)
+		local t = timer.new(config.options.duration.work, {
+			on_timer_end = handle_block_completion,
+		})
+		current_block = block.new(task_name, "work", t)
+		Snacks.notifier.notify("Started task: " .. task_name, "info")
+		table.insert(block_list, current_block)
+		current_block:start()
+	end
+
+	task_input = function()
 		Snacks.input({ prompt = "What will you work on? ", value = task_name }, function(input)
 			if input and input ~= "" then
-				local t = timer.new(config.options.duration.work, {
-					on_timer_end = handle_block_completion,
-				})
-
-				current_block = block.new(input, "work", t)
-				vim.notify("Started task: " .. input, vim.log.levels.INFO)
-				current_block:start()
+				create_task(input)
 			else
 				vim.notify("Task name cannot be empty.", vim.log.levels.WARN)
 			end
 		end)
 	end
 
+	get_session_blocks = function()
+		return block_list
+	end
+
+	-- TODO: Handle if the UI is closed without new task selection or input
+	start_task = function(task_name)
+		if has_dooing then
+			local s = require("dooing.state")
+
+			local tasks = { { label = "↳ Manual input…", index = 0 } }
+
+			for i, b in ipairs(get_session_blocks()) do
+				table.insert(tasks, { label = b.name, index = i })
+			end
+
+			for i, todo in ipairs(s.todos) do
+				if not todo.done then
+					table.insert(tasks, { label = todo.text, index = i })
+				end
+			end
+
+			vim.ui.select(tasks, {
+				prompt = "Some text",
+				format_item = function(item)
+					return item.label
+				end,
+			}, function(selected)
+				if selected.index == 0 then
+					task_input()
+				else
+					create_task(selected.label)
+				end
+			end)
+		else
+			task_input()
+		end
+	end
+
+	-- TODO: Clean up commands, maybe use a single command with args
 	vim.api.nvim_create_user_command("TimeboxBreakdown", breakdown.show_breakdown, {})
 	vim.api.nvim_create_user_command("TimeboxStart", start_task, {})
 	vim.api.nvim_create_user_command("TimeboxPause", handle_pause, {})
@@ -85,7 +129,7 @@ function M.setup(opts)
 			local status = current_block:is_paused() and "Paused" or "Running"
 			local elapsed = current_block.timer:get_elapsed() .. "s"
 			vim.notify(
-				"Current task: " .. current_block.name .. " | Status: " .. status .. " with " .. elapsed,
+				"Current task: " .. current_block.name .. "\nStatus: " .. status .. " with " .. elapsed,
 				vim.log.levels.INFO
 			)
 		else
