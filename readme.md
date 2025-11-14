@@ -20,8 +20,8 @@ return {
 	dependencies = { "folke/snacks.nvim" },
 	opts = {
 		duration = {
-			work = 1 * 60,
-			coffee = 1 * 60,
+			work = 25 * 60,
+			coffee = 5 * 60,
 		},
         win = {
             width = 120,
