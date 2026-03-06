@@ -40,10 +40,10 @@ function M:stop()
 end
 
 function M:pause()
-	if self.timer then
+	if self.timer and self.start_time then
+		self.elapsed = self.elapsed + (os.time() - self.start_time)
 		self.start_time = nil
 		self.timer:stop()
-		self.elapsed = self.elapsed + (os.time() - self.start_time)
 	end
 end
 

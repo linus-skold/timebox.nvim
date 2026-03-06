@@ -4,16 +4,22 @@
 ---@field debug boolean
 ---@field duration {work: number, coffee: number}
 ---@field notifications boolean
+---@field startup_prompt boolean Whether to ask what to work on when Neovim starts
+---@field idle_timeout number Seconds of inactivity before prompting "are you still there?" (default: 600)
+---@field idle_check_interval number How often (seconds) to check for idleness (default: 60)
 ---@field messages {start_work: string, end_work: string, start_coffee: string, end_coffee: string}
 ---@field storage {dir: string}
 
 local M = {}
 
 M.defaults = {
-    enable = true,
-    debug = false,
-	notifications = true, 
-    duration = {
+	enable = true,
+	debug = false,
+	notifications = true,
+	startup_prompt = true,
+	idle_timeout = 10 * 60,
+	idle_check_interval = 60,
+	duration = {
 		work = 25 * 60,
 		coffee = 5 * 60,
 	},
